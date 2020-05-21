@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@atlaskit/css-reset@2.0.0/dist/bundle.css"
+      media="all"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@atlaskit/reduced-ui-pack@12.0.7/dist/bundle.css"
+      media="all"
+    />
+    <style>
+      .container {
+        padding: 16px;
+      }
+      .help {
+        font-size: 0.857143em;
+        font-style: inherit;
+        line-height: 1.33333;
+        font-weight: normal;
+        color: rgb(107, 119, 140);
+        margin-top: 4px;
+        display: flex;
+      }
+      .error {
+        color: rgb(222, 53, 11);
+      }
+    </style>
+    <script src="https://connect-cdn.atl-paas.net/all.js"></script>
+  </head>
+  <body>
+    <section id="content" class="container">
+      <h1>Twilio Settings</h1>
+      <form method="POST" action="/save-settings" id="settings-form">
+        <div id="error" class="error" hidden></div>
+        <div class="ak-field-group">
+          <label for="phone-number">Your Twilio phone number</label>
+          <input
+            type="tel"
+            class="ak-field-text"
+            name="phone-number"
+            id="phone-number"
+            placeholder="Enter your Twilio phone number"
+            autocomplete="tel"
+            inputmode="tel"
+            required
+          />
+          <p class="help">Please enter the number in e.164 format.</p>
+        </div>
+        <div class="ak-field-group">
+          <label for="account-sid">Your Twilio Account SID</label>
+          <input
+            type="text"
+            name="account-sid"
+            id="account-sid"
+            class="ak-field-text"
+            placeholder="Enter your Twilio Account SID"
+            required
+          />
+          <p class="help">Find this in your Twilio console.</p>
+        </div>
+        <div class="ak-field-group">
+          <label for="api-key">Your Twilio API Key</label>
+          <input
+            type="text"
+            name="api-key"
+            id="api-key"
+            class="ak-field-text"
+            placeholder="Enter your Twilio API Key"
+            required
+          />
+        </div>
+        <div class="ak-field-group">
+          <label for="api-secret">Your Twilio API Key</label>
+          <input
+            type="text"
+            name="api-secret"
+            id="api-secret"
+            class="ak-field-text"
+            placeholder="Enter your Twilio API Key"
+            required
+          />
+        </div>
+        <input name="jwt" id="jwt" type="hidden" />
+        <div class="ak-field-group">
+          <button
+            type="submit"
+            class="ak-button ak-button__appearance-primary"
+            id="btn-submit"
+            disabled
+          >
+            Submit
+          </button>
+          <p class="help">
+            This will update your phone number settings in your Twilio account.
+          </p>
+        </div>
+      </form>
+      <div id="success-message" hidden>
+        <p>Your settings have been saved.</p>
+      </div>
+    </section>
+
+    <script type="text/javascript">
+      window.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("settings-form");
+        const phoneNumberField = document.getElementById("phone-number");
+        const accountSidField = document.getElementById("account-sid");
+        const apiKeyField = document.getElementById("api-key");
+        const apiSecretField = document.getElementById("api-secret");
+        const fields = [
+          phoneNumberField,
+          accountSidField,
+          apiKeyField,
+          apiSecretField,
+        ];
+        const jwtField = document.getElementById("jwt");
+        const button = document.getElementById("btn-submit");
+        const successMessage = document.getElementById("success-message");
+        const editSettings = document.getElementById("edit-settings");
+        const error = document.getElementById("error");
+
+        let settingsLoaded = false;
+
+        const formReady = function () {
+          return settingsLoaded && jwtField.value !== "";
+        };
+        const enableForm = function () {
+          fields.forEach((field) => field.removeAttribute("disabled"));
+          button.removeAttribute("disabled");
+        };
+        const disableForm = function () {
+          fields.forEach((field) => field.setAttribute("disabled", true));
+          button.setAttribute("disabled", true);
+        };
+        const fillInForm = function (data) {
+          phoneNumberField.value = data.phoneNumber || "";
+          apiKeyField.value = data.apiKey || "";
+          apiSecretField.value = data.apiSecret || "";
+          accountSidField.value = data.accountSid || "";
+          settingsLoaded = true;
+          if (formReady()) {
+            enableForm();
+          }
+        };
+
+        AP.context.getToken().then((token) => {
+          jwtField.value = token;
+          if (formReady()) {
+            enableForm();
+          }
+          fetch("/fetch-settings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ jwt: token }),
+          })
+            .then((res) => res.json())
+            .then(fillInForm)
+            .catch(console.error);
+        });
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+          disableForm();
+          error.innerHTML = "";
+          error.setAttribute("hidden", true);
+          button.textContent = "Sending...";
+          data = {
+            phoneNumber: phoneNumberField.value,
+            apiKey: apiKeyField.value,
+            apiSecret: apiSecretField.value,
+            accountSid: accountSidField.value,
+            jwt: jwtField.value,
+          };
+          fetch(form.getAttribute("action"), {
+            method: form.getAttribute("method"),
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              button.textContent = "Submit";
+              if (result.success) {
+                successMessage.removeAttribute("hidden");
+              } else {
+                const errorMessage = document.createElement("p");
+                errorMessage.appendChild(
+                  document.createTextNode(result.message)
+                );
+                error.appendChild(errorMessage);
+                error.removeAttribute("hidden");
+              }
+              enableForm();
+            });
+        });
+
+        editSettings.addEventListener("click", () => {
+          form.removeAttribute("hidden");
+          successMessage.setAttribute("hidden", true);
+          enableForm();
+        });
+      });
+    </script>
+  </body>
+</html>

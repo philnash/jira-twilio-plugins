@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@atlaskit/css-reset@2.0.0/dist/bundle.css"
+      media="all"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@atlaskit/reduced-ui-pack@12.0.7/dist/bundle.css"
+      media="all"
+    />
+    <style>
+      .error {
+        color: rgb(222, 53, 11);
+      }
+    </style>
+    <script src="https://connect-cdn.atl-paas.net/all.js"></script>
+  </head>
+  <body>
+    <section id="content" class="ac-content">
+      <form method="POST" action="/outbound-sms" id="sms-form">
+        <div id="error" class="error" hidden></div>
+        <div class="ak-field-group">
+          <label for="phonenumber">Phone number</label>
+          <input
+            type="tel"
+            class="ak-field-text"
+            name="phonenumber"
+            id="phonenumber"
+            aria-describedby="phonenumber"
+            placeholder="Enter phone number"
+            autocomplete="tel"
+            disabled
+          />
+        </div>
+        <div class="ak-field-group">
+          <label for="message">Text Message</label>
+          <textarea
+            name="message"
+            id="message"
+            rows="3"
+            class="ak-field-textarea"
+            disabled
+          ></textarea>
+
+          <input name="issueKey" id="issueKey" type="hidden" />
+          <input name="jwt" id="jwt" type="hidden" />
+        </div>
+        <div class="ak-field-group">
+          <button
+            type="submit"
+            class="ak-button ak-button__appearance-primary"
+            id="btn-submit"
+            disabled
+          >
+            Send Message
+          </button>
+        </div>
+      </form>
+      <div id="success-message" hidden>
+        <p>Your message was sent successfully.</p>
+        <div class="ak-field-group">
+          <button
+            type="button"
+            id="send-another"
+            class="ak-button ak-button__appearance-primary"
+          >
+            Send another
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <script type="text/javascript">
+      window.addEventListener("DOMContentLoaded", function() {
+        const params = new URL(document.location).searchParams;
+        const issueKey = params.get("issueKey");
+        const form = document.getElementById("sms-form");
+        const issueKeyField = document.getElementById("issueKey");
+        const phonenumberField = document.getElementById("phonenumber");
+        const jwtField = document.getElementById("jwt");
+        const messageField = document.getElementById("message");
+        const button = document.getElementById("btn-submit");
+        const successMessage = document.getElementById("success-message");
+        const sendAnother = document.getElementById("send-another");
+        const error = document.getElementById("error");
+        issueKeyField.value = issueKey;
+
+        const formReady = function() {
+          return phonenumberField.value !== "" && jwtField.value !== "";
+        };
+        const enableForm = function() {
+          messageField.removeAttribute("disabled");
+          button.removeAttribute("disabled");
+        };
+        const disableForm = function() {
+          messageField.setAttribute("disabled", true);
+          button.setAttribute("disabled", true);
+        };
+
+        AP.request({
+          url: "/rest/api/3/issue/" + issueKey,
+          type: "GET",
+          success: function(responseText) {
+            const result = JSON.parse(responseText);
+            const phonenumber = result.fields.customfield_10031;
+            phonenumberField.value = phonenumber;
+            if (formReady()) {
+              enableForm();
+            }
+          }
+        });
+
+        AP.context.getToken().then(token => {
+          jwtField.value = token;
+          if (formReady()) {
+            enableForm();
+          }
+        });
+
+        form.addEventListener("submit", function(event) {
+          event.preventDefault();
+          disableForm();
+          error.innerHTML = "";
+          button.textContent = "Sending...";
+          error.setAttribute("hidden", true);
+          data = {
+            phonenumber: phonenumberField.value,
+            message: messageField.value,
+            issueKey: issueKeyField.value,
+            jwt: jwtField.value
+          };
+          fetch(form.getAttribute("action"), {
+            method: form.getAttribute("method"),
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json"
+            },
+            body: JSON.stringify(data)
+          })
+            .then(res => res.json())
+            .then(result => {
+              button.textContent = "Send Message";
+              if (result.success) {
+                form.setAttribute("hidden", true);
+                messageField.value = "";
+                successMessage.removeAttribute("hidden");
+              } else {
+                const errorMessage = document.createElement("p");
+                errorMessage.appendChild(
+                  document.createTextNode(result.message)
+                );
+                error.appendChild(errorMessage);
+                error.removeAttribute("hidden");
+                enableForm();
+              }
+            });
+        });
+
+        sendAnother.addEventListener("click", () => {
+          form.removeAttribute("hidden");
+          successMessage.setAttribute("hidden", true);
+          enableForm();
+        });
+      });
+    </script>
+  </body>
+</html>
