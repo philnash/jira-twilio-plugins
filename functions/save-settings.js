@@ -1,3 +1,4 @@
+const Twilio = require("twilio");
 const utils = require(Runtime.getAssets()["/utils.js"].path);
 
 const updatePhoneNumber = async (
@@ -47,6 +48,10 @@ exports.handler = async function (context, event, callback) {
       phoneNumber,
       context.BASE_URL || context.DOMAIN
     );
+    const doc = await utils.updateOrCreateDocument(context, phoneNumber, {
+      clientKey,
+    });
+    console.log(doc);
     callback(null, { success: true });
   } catch (error) {
     callback(null, { success: false, message: error.message });

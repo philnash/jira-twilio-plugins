@@ -24,7 +24,6 @@ const updateOrCreateDocument = async (context, key, data) => {
   let document;
   try {
     document = await syncService.documents(key).fetch();
-    console.log({ ...document.data, ...data });
     await document.update({ data: { ...document.data, ...data } });
     return document;
   } catch (error) {
@@ -103,7 +102,8 @@ const buildApiOptions = (url, token, body) => {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
+    json: body,
+    responseType: "json",
   };
 };
 
@@ -125,6 +125,22 @@ const createComment = async (
   return got(buildApiOptions(url, token, body));
 };
 
+const findIssueByPhoneNumber = (baseUrl, appKey, sharedSecret, phoneNumber) => {
+  const url = `${baseUrl}/rest/api/3/search?jql="Phone number" ~ "${phoneNumber}" ORDER BY priority DESC, updated DESC&maxResults=1`;
+  const req = jwt.fromMethodAndUrl("GET", url);
+  const tokenData = buildTokenData(req, appKey);
+  const token = encode(tokenData, sharedSecret);
+
+  return got({
+    method: "GET",
+    url: `${url}&jwt=${token}`,
+    headers: {
+      Accept: "application/json",
+    },
+    responseType: "json",
+  });
+};
+
 module.exports = {
   findOrCreateDocument,
   updateOrCreateDocument,
@@ -132,4 +148,5 @@ module.exports = {
   encode,
   decode,
   createComment,
+  findIssueByPhoneNumber,
 };
