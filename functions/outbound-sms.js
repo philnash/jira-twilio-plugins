@@ -1,10 +1,6 @@
 const Twilio = require("twilio");
 const utils = require(Runtime.getAssets()["/utils.js"].path);
 
-const sendMessage = (client, from, to, body) => {
-  return client.messages.create({ from, to, body });
-};
-
 exports.handler = async function (context, event, callback) {
   const [success, claims] = await utils.decode(event.jwt, context);
   if (!success) {
@@ -21,12 +17,11 @@ exports.handler = async function (context, event, callback) {
     accountSid: settings.accountSid,
   });
   try {
-    const message = sendMessage(
-      client,
-      settings.phoneNumber,
-      event.phoneNumber,
-      event.message
-    );
+    const message = client.messages.create({
+      from: settings.phoneNumber,
+      to: event.phoneNumber,
+      body: event.message,
+    });
     const comment = utils.createComment(
       settings.baseUrl,
       context.APP_KEY,
@@ -41,6 +36,5 @@ exports.handler = async function (context, event, callback) {
   } catch (error) {
     console.error(error);
     callback(null, { success: false, message: error.message });
-    return;
   }
 };
