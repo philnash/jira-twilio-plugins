@@ -23,16 +23,14 @@
       <form method="POST" action="/outbound-sms" id="sms-form">
         <div id="error" class="error" hidden></div>
         <div class="ak-field-group">
-          <label for="phonenumber">Phone number</label>
+          <label for="phone-number">Phone number</label>
           <input
             type="tel"
             class="ak-field-text"
-            name="phonenumber"
-            id="phonenumber"
-            aria-describedby="phonenumber"
-            placeholder="Enter phone number"
-            autocomplete="tel"
-            disabled
+            name="phone-number"
+            id="phone-number"
+            aria-describedby="phone-number"
+            readonly
           />
         </div>
         <div class="ak-field-group">
@@ -74,12 +72,12 @@
     </section>
 
     <script type="text/javascript">
-      window.addEventListener("DOMContentLoaded", function() {
+      window.addEventListener("DOMContentLoaded", function () {
         const params = new URL(document.location).searchParams;
         const issueKey = params.get("issueKey");
         const form = document.getElementById("sms-form");
         const issueKeyField = document.getElementById("issueKey");
-        const phonenumberField = document.getElementById("phonenumber");
+        const phoneNumberField = document.getElementById("phone-number");
         const jwtField = document.getElementById("jwt");
         const messageField = document.getElementById("message");
         const button = document.getElementById("btn-submit");
@@ -88,60 +86,74 @@
         const error = document.getElementById("error");
         issueKeyField.value = issueKey;
 
-        const formReady = function() {
-          return phonenumberField.value !== "" && jwtField.value !== "";
+        const formReady = function () {
+          return phoneNumberField.value !== "" && jwtField.value !== "";
         };
-        const enableForm = function() {
+        const enableForm = function () {
           messageField.removeAttribute("disabled");
           button.removeAttribute("disabled");
         };
-        const disableForm = function() {
+        const disableForm = function () {
           messageField.setAttribute("disabled", true);
           button.setAttribute("disabled", true);
         };
 
         AP.request({
-          url: "/rest/api/3/issue/" + issueKey,
+          url: "/rest/api/3/field",
           type: "GET",
-          success: function(responseText) {
-            const result = JSON.parse(responseText);
-            const phonenumber = result.fields.customfield_10031;
-            phonenumberField.value = phonenumber;
-            if (formReady()) {
-              enableForm();
+          success: function (responseText) {
+            const fields = JSON.parse(responseText);
+            const field = fields.find(
+              (f) => f.name.toLowerCase() === "phone number"
+            );
+            if (field) {
+              AP.request({
+                url: "/rest/api/3/issue/" + issueKey,
+                type: "GET",
+                success: function (responseText) {
+                  const result = JSON.parse(responseText);
+                  const phoneNumber = result.fields[field.key];
+                  phoneNumberField.value = phoneNumber;
+                  if (formReady()) {
+                    enableForm();
+                  }
+                },
+              });
+            } else {
+              console.error("No 'Phone Number' field detected.");
             }
-          }
+          },
         });
 
-        AP.context.getToken().then(token => {
+        AP.context.getToken().then((token) => {
           jwtField.value = token;
           if (formReady()) {
             enableForm();
           }
         });
 
-        form.addEventListener("submit", function(event) {
+        form.addEventListener("submit", function (event) {
           event.preventDefault();
           disableForm();
           error.innerHTML = "";
           button.textContent = "Sending...";
           error.setAttribute("hidden", true);
           data = {
-            phonenumber: phonenumberField.value,
+            phoneNumber: phoneNumberField.value,
             message: messageField.value,
             issueKey: issueKeyField.value,
-            jwt: jwtField.value
+            jwt: jwtField.value,
           };
           fetch(form.getAttribute("action"), {
             method: form.getAttribute("method"),
             headers: {
               "Content-Type": "application/json",
-              Accept: "application/json"
+              Accept: "application/json",
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
           })
-            .then(res => res.json())
-            .then(result => {
+            .then((res) => res.json())
+            .then((result) => {
               button.textContent = "Send Message";
               if (result.success) {
                 form.setAttribute("hidden", true);

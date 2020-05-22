@@ -1,4 +1,3 @@
-const Twilio = require("twilio");
 const utils = require(Runtime.getAssets()["/utils.js"].path);
 
 const updatePhoneNumber = async (
@@ -16,7 +15,7 @@ const updatePhoneNumber = async (
   )[0];
   if (phoneNumberRecord) {
     return client.incomingPhoneNumbers(phoneNumberRecord.sid).update({
-      smsUrl: `${domain}inbound`,
+      smsUrl: `${domain}inbound-sms`,
     });
   } else {
     throw new Error(
