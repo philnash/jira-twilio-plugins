@@ -29,7 +29,7 @@ exports.handler = async function (context, event, callback) {
     return;
   }
 
-  let issue;
+  let issueRequest;
   try {
     issueRequest = await utils.findIssueByPhoneNumber(
       settings.baseUrl,
@@ -46,7 +46,6 @@ exports.handler = async function (context, event, callback) {
   }
 
   try {
-    console.log(issueRequest.body.issues[0].key);
     await utils.createComment(
       settings.baseUrl,
       context.APP_KEY,
