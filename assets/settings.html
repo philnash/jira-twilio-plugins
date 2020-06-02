@@ -25,7 +25,10 @@
         display: flex;
       }
       .error {
-        color: rgb(222, 53, 11);
+        color: #ff5630;
+      }
+      .success {
+        color: #36b37e;
       }
     </style>
     <script src="https://connect-cdn.atl-paas.net/all.js"></script>
@@ -35,6 +38,9 @@
       <h1>Twilio Settings</h1>
       <form method="POST" action="/save-settings" id="settings-form">
         <div id="error" class="error" hidden></div>
+        <div id="success-message" class="success" hidden>
+          <p>Your settings have been saved.</p>
+        </div>
         <div class="ak-field-group">
           <label for="phone-number">Your Twilio phone number</label>
           <input
@@ -73,7 +79,7 @@
           />
         </div>
         <div class="ak-field-group">
-          <label for="api-secret">Your Twilio API Key</label>
+          <label for="api-secret">Your Twilio API Secret</label>
           <input
             type="text"
             name="api-secret"
@@ -98,9 +104,6 @@
           </p>
         </div>
       </form>
-      <div id="success-message" hidden>
-        <p>Your settings have been saved.</p>
-      </div>
     </section>
 
     <script type="text/javascript">
