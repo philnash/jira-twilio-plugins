@@ -26,33 +26,33 @@ const updatePhoneNumber = async function (
 };
 
 exports.handler = async function (context, event, callback) {
-  const [success, claims] = await utils.decode(event.jwt, context);
-  if (!success) {
-    console.error(claims);
-    callback(claims);
-    return;
-  }
-  const clientKey = claims.iss;
-  const { phoneNumber, apiKey, apiSecret, accountSid } = event;
-  await utils.updateOrCreateDocument(context, utils.settingsKey(clientKey), {
-    phoneNumber,
-    apiKey,
-    apiSecret,
-    accountSid,
-  });
   try {
-    await updatePhoneNumber(
-      accountSid,
+    const claims = await utils.decode(event.jwt, context);
+    const clientKey = claims.iss;
+    const { phoneNumber, apiKey, apiSecret, accountSid } = event;
+    await utils.updateOrCreateDocument(context, utils.settingsKey(clientKey), {
+      phoneNumber,
       apiKey,
       apiSecret,
-      phoneNumber,
-      context.BASE_URL || context.DOMAIN
-    );
-    await utils.updateOrCreateDocument(context, phoneNumber, {
-      clientKey,
+      accountSid,
     });
-    callback(null, { success: true });
+    try {
+      await updatePhoneNumber(
+        accountSid,
+        apiKey,
+        apiSecret,
+        phoneNumber,
+        context.BASE_URL || context.DOMAIN
+      );
+      await utils.updateOrCreateDocument(context, phoneNumber, {
+        clientKey,
+      });
+      callback(null, { success: true });
+    } catch (error) {
+      callback(null, { success: false, message: error.message });
+    }
   } catch (error) {
-    callback(null, { success: false, message: error.message });
+    callback(error);
+    return;
   }
 };

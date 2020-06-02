@@ -48,20 +48,20 @@ const deleteDocument = async (context, key) => {
 
 const decode = async function (token, context) {
   if (typeof token === "undefined") {
-    return [false, "No token supplied"];
+    throw new Error("No token supplied");
   }
   const unverifiedClaims = jwt.decode(token, "", true);
   const clientKey = unverifiedClaims.iss;
   const doc = await findOrCreateDocument(context, settingsKey(clientKey));
   if (typeof doc.sharedSecret === "undefined") {
-    return [false, "Could not find client ID"];
+    throw new Error("Could not find client ID");
   }
   try {
     const claims = jwt.decode(token, doc.sharedSecret);
-    return [true, claims];
-  } catch (e) {
-    console.error(e);
-    return [false, e.message];
+    return claims;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 };
 
