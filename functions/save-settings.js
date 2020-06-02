@@ -48,7 +48,7 @@ exports.handler = async function (context, event, callback) {
       phoneNumber,
       context.BASE_URL || context.DOMAIN
     );
-    const doc = await utils.updateOrCreateDocument(context, phoneNumber, {
+    await utils.updateOrCreateDocument(context, phoneNumber, {
       clientKey,
     });
     callback(null, { success: true });

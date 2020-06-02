@@ -35,6 +35,17 @@ const updateOrCreateDocument = async (context, key, data) => {
   }
 };
 
+const deleteDocument = async (context, key) => {
+  const client = context.getTwilioClient();
+  const syncService = client.sync.services(context.SYNC_SERVICE_SID);
+  try {
+    await syncService.documents(key).remove();
+    return;
+  } catch (error) {
+    return;
+  }
+};
+
 const decode = async function (token, context) {
   if (typeof token === "undefined") {
     return [false, "No token supplied"];
@@ -144,6 +155,7 @@ const findIssueByPhoneNumber = (baseUrl, appKey, sharedSecret, phoneNumber) => {
 module.exports = {
   findOrCreateDocument,
   updateOrCreateDocument,
+  deleteDocument,
   settingsKey,
   encode,
   decode,

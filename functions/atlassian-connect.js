@@ -9,6 +9,7 @@ exports.handler = function (context, event, callback) {
     },
     lifecycle: {
       installed: "/installed",
+      uninstalled: "/uninstalled",
     },
     scopes: ["read", "write"],
     apiVersion: 1,
