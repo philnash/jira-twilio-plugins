@@ -1,26 +1,12 @@
-# Jira Issues by SMS plugin
+# Jira plugin examples with Twilio
 
-This is a Jira plugin that can send and receive messages to a phone number listed on a [Jira](https://www.atlassian.com/software/jira) issue using the [Twilio Programmable Messaging API](https://www.twilio.com/docs/sms) and hosted with [Twilio Functions](https://www.twilio.com/docs/runtime/functions).
+This is a repository of example [Jira](https://www.atlassian.com/software/jira) plugins that combine Jira and [Twilio](https://www.twilio.com).
 
-## What you need
+There are 2 plugins available right now.
 
-* A Twilio Account (sign up for a [free Twilio account here](https://www.twilio.com/try-twilio))
-* A [Twilio phone number](https://www.twilio.com/console/phone-numbers/incoming) that can send and receive SMS messages
-* A [Jira](https://www.atlassian.com/software/jira) instance
+1. [A basic plugin](./basic-plugin/): shows how to create a plugin, add an HTML form and send an SMS message when you submit the form
+2. [Jira Issues by SMS](./sms-issues): adds a phone number field to Jira issues and allows you to:
+   - send SMS messages from the issue
+   - receive SMS issues and add comments back to the issue
 
-For developing locally:
-
-* [Node.js](https://nodejs.org/)
-* [ngrok](https://ngrok.com/)
-
-## Running the plugin
-
-... details to come ...
-
-## Deployment 
-
-... details to come ...
-
-## License
-
-[MIT](LICENSE)
+The plugins are built using Node.js, [Twilio Functions](https://www.twilio.com/docs/runtime/functions) and the [Twilio Serverless Toolkit](https://www.twilio.com/docs/labs/serverless-toolkit).

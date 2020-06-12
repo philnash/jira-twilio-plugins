@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Send SMS with Twilio</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@atlaskit/css-reset@2.0.0/dist/bundle.css"
+      media="all"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@atlaskit/reduced-ui-pack@12.0.7/dist/bundle.css"
+      media="all"
+    />
+    <style>
+      .container {
+        padding: 16px;
+      }
+      .help {
+        font-size: 0.857143em;
+        font-style: inherit;
+        line-height: 1.33333;
+        font-weight: normal;
+        color: rgb(107, 119, 140);
+        margin-top: 4px;
+        display: flex;
+      }
+    </style>
+    <script src="https://connect-cdn.atl-paas.net/all.js"></script>
+  </head>
+  <body>
+    <section class="container ac-content">
+      <h1>Send SMS</h1>
+      <form method="POST" action="/send-sms">
+        <div class="ak-field-group">
+          <label for="phone-number">Phone number</label>
+          <input
+            type="tel"
+            class="ak-field-text"
+            name="phone-number"
+            id="phone-number"
+            inputmode="tel"
+            required
+          />
+          <p class="help">Please enter the number in e.164 format.</p>
+        </div>
+        <div class="ak-field-group">
+          <label for="message">Message</label>
+          <textarea
+            type="text"
+            name="message"
+            id="message"
+            class="ak-field-text"
+            required
+          ></textarea>
+        </div>
+        <div class="ak-field-group">
+          <button
+            type="submit"
+            class="ak-button ak-button__appearance-primary"
+            id="btn-submit"
+          >
+            Send message
+          </button>
+        </div>
+      </form>
+    </section>
+  </body>
+</html>
