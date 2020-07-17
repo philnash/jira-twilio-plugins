@@ -14,19 +14,28 @@ exports.handler = function (context, event, callback) {
     scopes: ["read", "write"],
     apiVersion: 1,
     modules: {
-      generalPages: [
+      jiraIssueFields: [
         {
-          url: "/settings.html",
-          key: "settings",
-          location: "system.top.navigation.bar",
+          key: "phone-number",
           name: {
-            value: "Twilio Settings",
+            value: "Phone number",
           },
+          description: {
+            value: "Phone number in e.164 format",
+          },
+          type: "string",
         },
       ],
+      configurePage: {
+        url: "/settings.html",
+        key: "settings",
+        name: {
+          value: "Twilio Settings",
+        },
+      },
       webPanels: [
         {
-          url: "/issue.html?issueKey={issue.key}",
+          url: "/issue?issueKey={issue.key}",
           location: "atl.jira.view.issue.right.context",
           layout: {
             width: "10px",

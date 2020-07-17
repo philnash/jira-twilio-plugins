@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8" />
+    <title>Send SMS via Twilio</title>
     <link
       rel="stylesheet"
       href="https://unpkg.com/@atlaskit/css-reset@2.0.0/dist/bundle.css"
@@ -104,7 +106,7 @@
           success: function (responseText) {
             const fields = JSON.parse(responseText);
             const field = fields.find(
-              (f) => f.name.toLowerCase() === "phone number"
+              (f) => f.key === "FIELD_KEY"
             );
             if (field) {
               AP.request({
@@ -112,7 +114,7 @@
                 type: "GET",
                 success: function (responseText) {
                   const result = JSON.parse(responseText);
-                  const phoneNumber = result.fields[field.key];
+                  const phoneNumber = result.fields[field.id];
                   phoneNumberField.value = phoneNumber;
                   if (formReady()) {
                     enableForm();
