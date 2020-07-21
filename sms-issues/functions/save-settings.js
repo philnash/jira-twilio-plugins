@@ -42,7 +42,7 @@ exports.handler = async function (context, event, callback) {
         apiKey,
         apiSecret,
         phoneNumber,
-        context.BASE_URL || context.DOMAIN
+        'https://' + context.DOMAIN_NAME
       );
       await utils.updateOrCreateDocument(context, phoneNumber, {
         clientKey,
