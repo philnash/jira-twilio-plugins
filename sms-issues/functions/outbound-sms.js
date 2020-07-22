@@ -3,7 +3,7 @@ const utils = require(Runtime.getAssets()["/utils.js"].path);
 
 exports.handler = async function (context, event, callback) {
   try {
-    const claims = utils.decode(event.jwt, context);
+    const claims = await utils.decode(event.jwt, context);
     const clientKey = claims.iss;
     const settings = await utils.findOrCreateDocument(
       context,

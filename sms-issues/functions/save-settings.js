@@ -15,9 +15,15 @@ const updatePhoneNumber = async function (
     })
   )[0];
   if (phoneNumberRecord) {
-    return client.incomingPhoneNumbers(phoneNumberRecord.sid).update({
-      smsUrl: `${domain}inbound-sms`,
-    });
+    let smsUrl;
+    if (domain.endsWith("/")) {
+      smsUrl = `${domain}inbound-sms`;
+    } else {
+      smsUrl = `${domain}/inbound-sms`;
+    }
+    return client
+      .incomingPhoneNumbers(phoneNumberRecord.sid)
+      .update({ smsUrl });
   } else {
     throw new Error(
       `Could not find the phone number "${phoneNumber}" using the provided credentials.`
@@ -42,7 +48,7 @@ exports.handler = async function (context, event, callback) {
         apiKey,
         apiSecret,
         phoneNumber,
-        'https://' + context.DOMAIN_NAME
+        "https://" + context.DOMAIN_NAME
       );
       await utils.updateOrCreateDocument(context, phoneNumber, {
         clientKey,
